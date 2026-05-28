@@ -30,7 +30,7 @@
             </div>
             <div class="hidden md:flex space-x-2 text-[10px]">
                 <span class="px-2 py-1 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 rounded">TAIFEX_OFFICIAL</span>
-                <span class="px-2 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded animate-pulse">100%_REAL</span>
+                <span class="px-2 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded animate-pulse">100%_REAL_DATA</span>
             </div>
         </div>
 
@@ -77,12 +77,11 @@
         </div>
     </div>
 
-    <script id="data-script">
-        const rawData = []; // 供未來機器人每天疊加最新數據使用
-    </script>
-
     <script>
-        // 💡 現在完全只採用從期交所下載回來的真實 rawData
+        // START_DATA
+        const rawData = [];
+        // END_DATA
+
         if (rawData.length > 0) {
             const latest = rawData[rawData.length - 1];
             document.getElementById('update-date').innerText = latest.date + " (官方同步)";
@@ -100,7 +99,6 @@
             fillRow('sitc', latest.sitc);
             fillRow('dealers', latest.dealers);
 
-            // 畫出 100% 真實歷史曲線
             const dates = rawData.map(d => d.date.substring(5));
             const foreignNets = rawData.map(d => d.foreign.net);
             const sitcNets = rawData.map(d => d.sitc.net);
@@ -128,7 +126,7 @@
                 }
             });
         } else {
-            document.getElementById('update-date').innerText = "WAITING_FOR_OFFICIAL_DATA_INJECTION...";
+            document.getElementById('update-date').innerText = "WAITING_FOR_DATA_INJECTION...";
         }
     </script>
 </body>
