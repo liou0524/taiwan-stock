@@ -5,7 +5,7 @@ import json
 from datetime import datetime, timedelta
 
 def get_today_live_data():
-    """第一軌：抓取今日最新即時籌碼（防擋、即時）"""
+    """第一軌：抓取今日最新即時數據（確保下午 15:10 必定有最新數字）"""
     url = "https://openapi.twse.com.tw/v1/taiwanFuturesBigTraders/callsAndPutsDate"
     today_str = datetime.now().strftime("%Y/%m/%d")
     try:
@@ -36,7 +36,7 @@ def get_today_live_data():
         return None
 
 def get_history_data():
-    """第二軌：動態解析官方歷史 CSV 檔（穩健、無誤差）"""
+    """第二軌：下載期交所歷史 CSV（確保過去一個月的歷史絕對精確）"""
     url = "https://www.taifex.com.tw/cht/3/futThreeBigProductInstiDown"
     end_date = datetime.now()
     start_date = end_date - timedelta(days=60)
@@ -91,9 +91,13 @@ def get_history_data():
         return []
 
 def update_web():
+    # 1. 抓取官方歷史當地基
     data_list = get_history_data()
+    
+    # 2. 抓取今日即時最新
     today_data = get_today_live_data()
     
+    # 3. 智慧融合：如果歷史 CSV 裡還沒有今天，就手動把今天黏在歷史的最右端
     if today_data:
         if not any(d['date'] == today_data['date'] for d in data_list):
             data_list.append(today_data)
@@ -102,35 +106,36 @@ def update_web():
                 if d['date'] == today_data['date']:
                     data_list[idx] = today_data
                     break
-    
+                    
     if len(data_list) < 10:
-        print("【安全機制】最終合併資料量嚴重不足，取消寫入。")
+        print("【異常】資料天數過少，取消寫入。")
         return
         
+    # 永遠滾動擷取最新的 30 個交易日
     data_list = data_list[-30:]
         
     with open("index.html", "r", encoding="utf-8") as f:
         html_content = f.read()
         
-    # 💡 終極修正：精確對齊新版 index.html 裡面的空陣列格式
-    start_tag = 'const rawData = ['
-    end_tag = ']; // 供未來機器人每天疊加最新數據使用'
+    # 尋找大寫英文字地標
+    start_marker = "// START_DATA"
+    end_marker = "// END_DATA"
     
-    start_idx = html_content.find(start_tag) + len(start_tag) - 1 # 包含 [
-    end_idx = html_content.find(end_tag) + 1 # 包含 ]
+    start_pos = html_content.find(start_marker)
+    end_pos = html_content.find(end_marker)
     
-    if html_content.find(start_tag) == -1 or html_content.find(end_tag) == -1:
-        print("【標籤錯誤】找不到準確的 const rawData 暗號位置，請確認 index.html 是否有被修改過。")
+    if start_pos == -1 or end_pos == -1:
+        print("【標籤錯誤】找不到 index.html 內部的指定暗號地標")
         return
         
-    new_data_str = json.dumps(data_list, ensure_ascii=False)
+    data_string = json.dumps(data_list, ensure_ascii=False)
+    injection = f"{start_marker}\n        const rawData = {data_string};\n        "
     
-    # 取代整段舊的 [xxx] 數據
-    new_html = html_content[:html_content.find(start_tag) + len(start_tag) - 1] + new_data_str + html_content[html_content.find(end_tag) + 1:]
+    new_html = html_content[:start_pos] + injection + html_content[end_pos:]
     
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(new_html)
-    print(f"【全面成功】雙軌籌碼校正寫入完畢！目前最新交易日為：{data_list[-1]['date']}")
+    print(f"【全面大成功】30日真實歷史籌碼融合完畢！最新更新日期：{data_list[-1]['date']}")
 
 if __name__ == "__main__":
     update_web()
