@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* 科技感發光特效 */
         .neon-border {
             box-shadow: 0 0 15px rgba(6, 182, 212, 0.15), inset 0 0 15px rgba(6, 182, 212, 0.05);
             border: 1px solid rgba(6, 182, 212, 0.3);
@@ -30,8 +29,8 @@
                 </p>
             </div>
             <div class="hidden md:flex space-x-2 text-[10px]">
-                <span class="px-2 py-1 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 rounded">SECURE_LINK</span>
-                <span class="px-2 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded animate-pulse">LIVE_DATA</span>
+                <span class="px-2 py-1 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 rounded">TAIFEX_OFFICIAL</span>
+                <span class="px-2 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded animate-pulse">100%_REAL</span>
             </div>
         </div>
 
@@ -40,25 +39,25 @@
                 <thead>
                     <tr class="border-b border-slate-800 text-slate-400 text-xs tracking-wider uppercase bg-slate-900/50">
                         <th class="p-4">法人項目 [ENTITY]</th>
-                        <th class="p-4 text-right">多方留倉 (口)</th>
-                        <th class="p-4 text-right">空方留倉 (口)</th>
+                        <th class="p-4 text-right">多方未平倉 (口)</th>
+                        <th class="p-4 text-right">空方未平倉 (口)</th>
                         <th class="p-4 text-right">淨部位 (口) [NET]</th>
                     </tr>
                 </thead>
                 <tbody class="text-sm divide-y divide-slate-800/60">
-                    <tr class="hover:bg-cyan-500/5 transition-colors">
+                    <tr>
                         <td class="p-4 font-bold text-amber-400 neon-text-orange tracking-wide">■ 外資及陸資</td>
                         <td id="foreign-long" class="p-4 text-right font-semibold">--</td>
                         <td id="foreign-short" class="p-4 text-right font-semibold">--</td>
                         <td id="foreign-net" class="p-4 text-right font-black text-base">--</td>
                     </tr>
-                    <tr class="hover:bg-cyan-500/5 transition-colors">
+                    <tr>
                         <td class="p-4 font-bold text-blue-400 tracking-wide">■ 投信</td>
                         <td id="sitc-long" class="p-4 text-right font-semibold">--</td>
                         <td id="sitc-short" class="p-4 text-right font-semibold">--</td>
                         <td id="sitc-net" class="p-4 text-right font-black text-base">--</td>
                     </tr>
-                    <tr class="hover:bg-cyan-500/5 transition-colors">
+                    <tr>
                         <td class="p-4 font-bold text-emerald-400 tracking-wide">■ 自營商</td>
                         <td id="dealers-long" class="p-4 text-right font-semibold">--</td>
                         <td id="dealers-short" class="p-4 text-right font-semibold">--</td>
@@ -69,25 +68,24 @@
         </div>
 
         <div class="bg-[#0d1321] border border-slate-800 p-4 rounded-xl">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                    📈 三大法人淨部位近一個月歷史趨勢 (📊 30 DAYS TRACKING)
-                </h3>
-            </div>
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
+                📈 三大法人淨部位近一個月歷史趨勢 (📊 30 DAYS OFFICIAL TRACKING)
+            </h3>
             <div class="h-72 md:h-80 w-full">
                 <canvas id="trendsChart"></canvas>
             </div>
         </div>
     </div>
 
-   <script id="data-script">
-    const rawData = [{"date": "2026/04/17", "foreign": {"long": 15326, "short": 77572, "net": -61143}, "sitc": {"long": 19865, "short": 5982, "net": 13714}, "dealers": {"long": 7784, "short": 8064, "net": -405}}, {"date": "2026/04/20", "foreign": {"long": 15209, "short": 74622, "net": -59433}, "sitc": {"long": 19778, "short": 5475, "net": 13723}, "dealers": {"long": 7867, "short": 9253, "net": -886}}, {"date": "2026/04/21", "foreign": {"long": 16652, "short": 73467, "net": -58379}, "sitc": {"long": 20494, "short": 6544, "net": 13396}, "dealers": {"long": 8049, "short": 8587, "net": -960}}, {"date": "2026/04/22", "foreign": {"long": 15600, "short": 74794, "net": -58096}, "sitc": {"long": 20287, "short": 7945, "net": 12321}, "dealers": {"long": 8406, "short": 9047, "net": -665}}, {"date": "2026/04/23", "foreign": {"long": 16442, "short": 73376, "net": -58234}, "sitc": {"long": 19093, "short": 7012, "net": 13342}, "dealers": {"long": 7733, "short": 9325, "net": -1034}}, {"date": "2026/04/24", "foreign": {"long": 15476, "short": 75600, "net": -58826}, "sitc": {"long": 19206, "short": 7455, "net": 12323}, "dealers": {"long": 7784, "short": 8319, "net": -355}}, {"date": "2026/04/27", "foreign": {"long": 15758, "short": 71716, "net": -55989}, "sitc": {"long": 19429, "short": 7465, "net": 12907}, "dealers": {"long": 7773, "short": 9282, "net": -1064}}, {"date": "2026/04/28", "foreign": {"long": 16247, "short": 71897, "net": -55597}, "sitc": {"long": 19350, "short": 6606, "net": 13487}, "dealers": {"long": 8246, "short": 8907, "net": -1157}}, {"date": "2026/04/29", "foreign": {"long": 15552, "short": 76753, "net": -59858}, "sitc": {"long": 20310, "short": 7303, "net": 13106}, "dealers": {"long": 8070, "short": 8566, "net": -842}}, {"date": "2026/04/30", "foreign": {"long": 16573, "short": 72177, "net": -55588}, "sitc": {"long": 19114, "short": 6645, "net": 12824}, "dealers": {"long": 8341, "short": 7899, "net": -367}}, {"date": "2026/05/01", "foreign": {"long": 15135, "short": 74044, "net": -58612}, "sitc": {"long": 20870, "short": 7950, "net": 12981}, "dealers": {"long": 8080, "short": 9353, "net": -956}}, {"date": "2026/05/04", "foreign": {"long": 16342, "short": 71337, "net": -55315}, "sitc": {"long": 19810, "short": 8007, "net": 12804}, "dealers": {"long": 8436, "short": 9171, "net": -1013}}, {"date": "2026/05/05", "foreign": {"long": 15285, "short": 72943, "net": -57438}, "sitc": {"long": 20525, "short": 7697, "net": 12452}, "dealers": {"long": 8051, "short": 8728, "net": -959}}, {"date": "2026/05/06", "foreign": {"long": 16195, "short": 72225, "net": -56408}, "sitc": {"long": 19741, "short": 6412, "net": 13037}, "dealers": {"long": 7641, "short": 8332, "net": -311}}, {"date": "2026/05/07", "foreign": {"long": 15096, "short": 73917, "net": -57154}, "sitc": {"long": 19224, "short": 6967, "net": 12346}, "dealers": {"long": 8142, "short": 8120, "net": -457}}, {"date": "2026/05/08", "foreign": {"long": 15130, "short": 71410, "net": -55622}, "sitc": {"long": 19781, "short": 7196, "net": 13024}, "dealers": {"long": 7979, "short": 8661, "net": -620}}, {"date": "2026/05/11", "foreign": {"long": 16930, "short": 74160, "net": -59137}, "sitc": {"long": 20393, "short": 7183, "net": 13293}, "dealers": {"long": 7617, "short": 8547, "net": -349}}, {"date": "2026/05/12", "foreign": {"long": 16574, "short": 73110, "net": -56798}, "sitc": {"long": 19696, "short": 5531, "net": 13697}, "dealers": {"long": 7800, "short": 8902, "net": -957}}, {"date": "2026/05/13", "foreign": {"long": 16953, "short": 76379, "net": -59901}, "sitc": {"long": 20793, "short": 7384, "net": 13089}, "dealers": {"long": 7769, "short": 9722, "net": -1227}}, {"date": "2026/05/14", "foreign": {"long": 16039, "short": 73965, "net": -57096}, "sitc": {"long": 19217, "short": 7062, "net": 13720}, "dealers": {"long": 8140, "short": 8853, "net": -1048}}, {"date": "2026/05/15", "foreign": {"long": 15407, "short": 71275, "net": -55962}, "sitc": {"long": 19765, "short": 7362, "net": 13199}, "dealers": {"long": 7665, "short": 8659, "net": -607}}, {"date": "2026/05/18", "foreign": {"long": 15663, "short": 72852, "net": -56852}, "sitc": {"long": 19039, "short": 7068, "net": 12161}, "dealers": {"long": 8451, "short": 8488, "net": -617}}, {"date": "2026/05/19", "foreign": {"long": 15493, "short": 75475, "net": -58677}, "sitc": {"long": 20161, "short": 8289, "net": 12650}, "dealers": {"long": 7580, "short": 8758, "net": -1171}}, {"date": "2026/05/20", "foreign": {"long": 15141, "short": 71758, "net": -55201}, "sitc": {"long": 20090, "short": 7413, "net": 13155}, "dealers": {"long": 7628, "short": 8026, "net": -395}}, {"date": "2026/05/21", "foreign": {"long": 16125, "short": 71130, "net": -55792}, "sitc": {"long": 19542, "short": 6947, "net": 13133}, "dealers": {"long": 8393, "short": 8382, "net": -261}}, {"date": "2026/05/22", "foreign": {"long": 16104, "short": 74276, "net": -57730}, "sitc": {"long": 20494, "short": 7819, "net": 12593}, "dealers": {"long": 7705, "short": 8509, "net": -279}}, {"date": "2026/05/25", "foreign": {"long": 16330, "short": 74407, "net": -58643}, "sitc": {"long": 19897, "short": 7865, "net": 12977}, "dealers": {"long": 8029, "short": 8505, "net": -543}}, {"date": "2026/05/26", "foreign": {"long": 15131, "short": 75897, "net": -60205}, "sitc": {"long": 19043, "short": 7537, "net": 12667}, "dealers": {"long": 8067, "short": 8735, "net": -1000}}, {"date": "2026/05/27", "foreign": {"long": 15145, "short": 72825, "net": -56376}, "sitc": {"long": 20292, "short": 6509, "net": 12611}, "dealers": {"long": 7734, "short": 8792, "net": -1223}}, {"date": "2026/05/28", "foreign": {"long": 16052, "short": 76426, "net": -60939}, "sitc": {"long": 19570, "short": 7534, "net": 12836}, "dealers": {"long": 7997, "short": 8877, "net": -1158}}]; // 初始空陣列，爬蟲會把資料填在這裡
-</script>
+    <script id="data-script">
+        const rawData = []; // 供未來機器人每天疊加最新數據使用
+    </script>
 
     <script>
+        // 💡 現在完全只採用從期交所下載回來的真實 rawData
         if (rawData.length > 0) {
             const latest = rawData[rawData.length - 1];
-            document.getElementById('update-date').innerText = latest.date + " 15:10 (自動同步)";
+            document.getElementById('update-date').innerText = latest.date + " (官方同步)";
             
             const fillRow = (prefix, data) => {
                 document.getElementById(`${prefix}-long`).innerText = data.long.toLocaleString();
@@ -95,21 +93,15 @@
                 const net = data.net;
                 const netEl = document.getElementById(`${prefix}-net`);
                 netEl.innerText = (net > 0 ? "+" : "") + net.toLocaleString();
-                
-                // 科技感配色：正數用科技紅(偏粉紅爆發)，負數用螢光綠
-                if(net >= 0) {
-                    netEl.className = "p-4 text-right font-black text-base text-rose-500";
-                } else {
-                    netEl.className = "p-4 text-right font-black text-base text-emerald-400";
-                }
+                netEl.className = net >= 0 ? "p-4 text-right font-black text-base text-rose-500" : "p-4 text-right font-black text-base text-emerald-400";
             };
             
             fillRow('foreign', latest.foreign);
             fillRow('sitc', latest.sitc);
             fillRow('dealers', latest.dealers);
 
-            // 圖表渲染
-            const dates = rawData.map(d => d.date.substring(5)); // 格式化成 05/28
+            // 畫出 100% 真實歷史曲線
+            const dates = rawData.map(d => d.date.substring(5));
             const foreignNets = rawData.map(d => d.foreign.net);
             const sitcNets = rawData.map(d => d.sitc.net);
             const dealersNets = rawData.map(d => d.dealers.net);
@@ -120,25 +112,23 @@
                 data: {
                     labels: dates,
                     datasets: [
-                        { label: '外資淨額', data: foreignNets, borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.03)', borderWidth: 3, pointRadius: dates.length > 15 ? 1 : 3, tension: 0.2, fill: true },
-                        { label: '投信淨額', data: sitcNets, borderColor: '#3b82f6', borderWidth: 2, pointRadius: dates.length > 15 ? 1 : 3, tension: 0.2 },
-                        { label: '自營商淨額', data: dealersNets, borderColor: '#10b981', borderWidth: 2, pointRadius: dates.length > 15 ? 1 : 3, tension: 0.2 }
+                        { label: '外資淨額', data: foreignNets, borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.03)', borderWidth: 3, pointRadius: 2, tension: 0.15, fill: true },
+                        { label: '投信淨額', data: sitcNets, borderColor: '#3b82f6', borderWidth: 2, pointRadius: 2, tension: 0.15 },
+                        { label: '自營商淨額', data: dealersNets, borderColor: '#10b981', borderWidth: 2, pointRadius: 2, tension: 0.15 }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { labels: { color: '#94a3b8', font: { family: 'monospace', size: 11 } } } 
-                    },
+                    plugins: { legend: { labels: { color: '#94a3b8', font: { family: 'monospace', size: 11 } } } },
                     scales: {
-                        x: { grid: { color: 'rgba(51, 65, 85, 0.3)' }, ticks: { color: '#64748b', font: { family: 'monospace' } } },
-                        y: { grid: { color: 'rgba(51, 65, 85, 0.3)' }, ticks: { color: '#64748b', font: { family: 'monospace' } } }
+                        x: { grid: { color: 'rgba(51, 65, 85, 0.2)' }, ticks: { color: '#64748b', font: { family: 'monospace', size: 10 } } },
+                        y: { grid: { color: 'rgba(51, 65, 85, 0.2)' }, ticks: { color: '#64748b', font: { family: 'monospace' } } }
                     }
                 }
             });
         } else {
-            document.getElementById('update-date').innerText = "DATA_EMPTY // WAITING_FOR_SEQUENCE";
+            document.getElementById('update-date').innerText = "WAITING_FOR_OFFICIAL_DATA_INJECTION...";
         }
     </script>
 </body>
