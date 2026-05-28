@@ -12,16 +12,14 @@ permissions:
 jobs:
   refresh-data:
     runs-on: ubuntu-latest
-    # 💡 加上這一行，強制讓所有 Actions 在 Node.js 24 環境下運行，消滅警告！
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
+    # 💡 移除原本的強迫指令，直接換成官方推薦相容新環境的最新版動作
     - name: 複製儲存庫檔案
-      uses: actions/checkout@v4
+      uses: actions/checkout@v4.2.2 # 或最新相容版
 
     - name: 設定 Python 環境
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v5.1.1 # 或最新相容版
       with:
         python-version: '3.10'
 
