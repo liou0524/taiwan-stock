@@ -12,6 +12,10 @@ permissions:
 jobs:
   refresh-data:
     runs-on: ubuntu-latest
+    # 💡 加上這一行，強制讓所有 Actions 在 Node.js 24 環境下運行，消滅警告！
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
     steps:
     - name: 複製儲存庫檔案
       uses: actions/checkout@v4
