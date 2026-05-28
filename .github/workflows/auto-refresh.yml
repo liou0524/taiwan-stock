@@ -1,0 +1,35 @@
+name: 每日自動三大法人期貨更新
+
+on:
+  schedule:
+    # 國際標準時 (UTC) 07:10 等於 台北時間 (UTC+8) 15:10
+    - cron: '10 7 * * 1-5'
+  workflow_dispatch: # 允許手動點擊按鈕執行
+
+permissions:
+  contents: write
+
+jobs:
+  refresh-data:
+    runs-on: ubuntu-latest
+    steps:
+    - name: 複製儲存庫檔案
+      uses: actions/checkout@v4
+
+    - name: 設定 Python 環境
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: 安裝網路請求套件
+      run: pip install requests
+
+    - name: 執行期交所爬蟲
+      run: python crawler.py
+
+    - name: 將更新後的資料推回 GitHub
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add index.html
+        git diff --quiet && git diff --staged --quiet || (git commit -m "自動更新三大法人期貨數據" && git push)
