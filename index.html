@@ -1,1 +1,30 @@
-<h1>等待機器人第一次寫入...</h1>
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎛️ TRI-法人期貨留倉高級觀測站</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .neon-border { box-shadow: 0 0 15px rgba(6, 182, 212, 0.15); border: 1px solid rgba(6, 182, 212, 0.3); }
+        .neon-text-cyan { text-shadow: 0 0 8px rgba(6, 182, 212, 0.6); }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loader { border: 3px solid rgba(6, 182, 212, 0.1); border-radius: 50%; border-top: 3px solid #06b6d4; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+    </style>
+</head>
+<body class="bg-[#0b0f19] text-slate-200 min-h-screen p-4 md:p-8 flex flex-col items-center justify-start font-mono">
+    <div class="w-full max-w-5xl bg-[#111827]/80 backdrop-blur-md rounded-2xl p-6 my-2 neon-border">
+        <div class="flex justify-between items-center border-b border-cyan-500/30 pb-4 mb-6">
+            <div>
+                <h1 class="text-xl md:text-2xl font-black tracking-widest text-cyan-400 neon-text-cyan">SYSTEM://TRI_法人期貨留倉觀測站</h1>
+                <p class="text-[10px] text-slate-500 mt-1 flex items-center gap-2">
+                    <span class="loader"></span> 系統數據初始化寫入中，請至 Actions 手動發動一次或等待定時更新...
+                </p>
+            </div>
+        </div>
+        <div class="p-12 text-center text-slate-500 text-sm">
+            📡 正在與期交所開放平台建立核心數據連結，請手動觸行動能組件...
+        </div>
+    </div>
+</body>
+</html>
