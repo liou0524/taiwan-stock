@@ -91,44 +91,42 @@ def get_history_data():
         return []
 
 def update_web():
-    # 1. 先抓歷史基底
     data_list = get_history_data()
-    
-    # 2. 抓今天最新的即時數據
     today_data = get_today_live_data()
     
-    # 3. 雙軌大融合機制
     if today_data:
-        # 如果歷史資料裡還沒有今天，就把今天強力黏在最後面
         if not any(d['date'] == today_data['date'] for d in data_list):
             data_list.append(today_data)
         else:
-            # 如果歷史資料已經有今天了，用最新即時數據覆蓋，確保萬無一失
             for idx, d in enumerate(data_list):
                 if d['date'] == today_data['date']:
                     data_list[idx] = today_data
                     break
     
-    # 防錯安全熔斷
     if len(data_list) < 10:
-        print("【安全機制】最終合併資料量嚴重不足，取消寫入防止損壞網頁！")
+        print("【安全機制】最終合併資料量嚴重不足，取消寫入。")
         return
         
-    # 永遠保留最完美的最新 30 筆交易日紀錄
     data_list = data_list[-30:]
         
     with open("index.html", "r", encoding="utf-8") as f:
         html_content = f.read()
         
-    start_tag = 'const rawData = '
-    end_tag = '; // 供未來機器人每天疊加最新數據使用'
-    start_idx = html_content.find(start_tag) + len(start_tag)
-    end_idx = html_content.find(end_tag)
+    # 💡 終極修正：精確對齊新版 index.html 裡面的空陣列格式
+    start_tag = 'const rawData = ['
+    end_tag = ']; // 供未來機器人每天疊加最新數據使用'
     
-    if start_idx == -1 or end_idx == -1: return
+    start_idx = html_content.find(start_tag) + len(start_tag) - 1 # 包含 [
+    end_idx = html_content.find(end_tag) + 1 # 包含 ]
+    
+    if html_content.find(start_tag) == -1 or html_content.find(end_tag) == -1:
+        print("【標籤錯誤】找不到準確的 const rawData 暗號位置，請確認 index.html 是否有被修改過。")
+        return
         
     new_data_str = json.dumps(data_list, ensure_ascii=False)
-    new_html = html_content[:start_idx] + new_data_str + html_content[end_idx:]
+    
+    # 取代整段舊的 [xxx] 數據
+    new_html = html_content[:html_content.find(start_tag) + len(start_tag) - 1] + new_data_str + html_content[html_content.find(end_tag) + 1:]
     
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(new_html)
