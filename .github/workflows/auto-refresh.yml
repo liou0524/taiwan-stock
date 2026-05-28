@@ -2,7 +2,7 @@ name: 每日自動三大法人期貨更新
 
 on:
   schedule:
-    # 國際標準時 (UTC) 07:10 等於 台北時間 (UTC+8) 15:10
+    # 國際標準時 (UTC) 07:10 等於 台北時間 (UTC+8) 15:10 (每週一至週五)
     - cron: '10 7 * * 1-5'
   workflow_dispatch: # 允許手動點擊按鈕執行
 
@@ -22,7 +22,6 @@ jobs:
       with:
         python-version: '3.10'
 
-    # 安裝 requests 與處理 CSV 必備的 pandas 套件
     - name: 安裝網路請求與資料處理套件
       run: pip install requests pandas
 
