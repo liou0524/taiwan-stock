@@ -22,6 +22,7 @@ jobs:
       with:
         python-version: '3.10'
 
+    # 安裝 requests 與處理 CSV 必備的 pandas 套件
     - name: 安裝網路請求與資料處理套件
       run: pip install requests pandas
 
