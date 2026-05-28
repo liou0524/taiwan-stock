@@ -23,9 +23,9 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: 安裝網路請求套件
-      run: pip install requests
-
+   - name: 安裝網路請求套件
+  run: pip install requests pandas
+  
     - name: 執行期交所爬蟲
       run: python crawler.py
 
