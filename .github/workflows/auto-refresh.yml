@@ -14,18 +14,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 💡 移除原本的強迫指令，直接換成官方推薦相容新環境的最新版動作
     - name: 複製儲存庫檔案
-      uses: actions/checkout@v4.2.2 # 或最新相容版
+      uses: actions/checkout@v4.2.2
 
     - name: 設定 Python 環境
-      uses: actions/setup-python@v5.1.1 # 或最新相容版
+      uses: actions/setup-python@v5.1.1
       with:
         python-version: '3.10'
 
-   - name: 安裝網路請求套件
-  run: pip install requests pandas
-  
+    - name: 安裝網路請求與資料處理套件
+      run: pip install requests pandas
+
     - name: 執行期交所爬蟲
       run: python crawler.py
 
