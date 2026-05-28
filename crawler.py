@@ -117,7 +117,7 @@ def update_web():
         
     if not any(d['date'] == new_data['date'] for d in data_list):
         data_list.append(new_data)
-        if len(data_list) > 10:
+        if len(data_list) > 30:
             data_list.pop(0)
             
     new_data_str = json.dumps(data_list, ensure_ascii=False)
