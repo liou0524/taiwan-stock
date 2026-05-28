@@ -170,7 +170,6 @@ def generate_html_template(data_list_json):
 </body>
 </html>
 """
-"""
 
 def update_web():
     data_list = get_history_data()
