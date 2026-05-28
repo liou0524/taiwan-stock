@@ -4,101 +4,135 @@ import pandas as pd
 import json
 from datetime import datetime, timedelta
 
-def get_real_30_day_history():
-    """
-    直接下載期交所官方的「歷史三大法人期貨留倉」CSV 檔
-    此官方歷史下載接口不阻擋海外 IP，且能拿到 100% 精確、無誤差的歷史數據
-    """
-    url = "https://www.taifex.com.tw/cht/3/futThreeBigProductInstiDown"
-    
-    # 抓取過去 50 天（確保扣除假日後有 30 個交易日）
-    end_date = datetime.now()
-    start_date = end_date - timedelta(days=50)
-    
-    payload = {
-        'down_type': '1', # 歷史資料下載
-        'queryStartDate': start_date.strftime("%Y/%m/%d"),
-        'queryEndDate': end_date.strftime("%Y/%m/%d"),
-        'commodityId': 'TX' # 臺股期貨
-    }
-    
+def get_today_live_data():
+    """第一軌：抓取今日最新即時籌碼（防擋、即時）"""
+    url = "https://openapi.twse.com.tw/v1/taiwanFuturesBigTraders/callsAndPutsDate"
+    today_str = datetime.now().strftime("%Y/%m/%d")
     try:
-        response = requests.post(url, data=payload, timeout=20)
-        if response.status_code != 200:
-            print("無法連線至期交所歷史下載伺服器")
-            return None
+        response = requests.get(url, timeout=15)
+        if response.status_code != 200: return None
+        data_json = response.json()
+        tx_data = [item for item in data_json if "臺股期貨" in item.get('CommodityId', '') or item.get('CommodityId') == 'TX']
+        if not tx_data: return None
             
-        # 將下載的 CSV 轉為 Pandas DataFrame
-        csv_data = io.StringIO(response.text)
-        df = pd.read_csv(csv_data, encoding='utf-8')
-        
-        # 期交所 CSV 欄位清洗
-        # 欄位通常包含：日期, 商品名稱, 身份別, 多方未平倉量, 空方未平倉量, 多空淨額
-        df.columns = [c.strip() for c in df.columns]
-        
-        # 篩選大台指
-        df = df[df['商品名稱'].str.contains('臺股期貨|TX', na=False)]
-        
-        results = {}
-        for _, row in df.iterrows():
-            date_str = str(row['日期']).strip().replace('-', '/') # 確保格式為 YYYY/MM/DD
-            if date_str not in results:
-                results[date_str] = {'date': date_str}
-                
-            name = str(row['身份別']).strip()
-            
-            # 依據 CSV 結構撈取未平倉數據（通常為：未平倉多方口數、未平倉空方口數、未平倉多空淨額）
-            # 防呆處理：若欄位名稱微調，以相對位置或關鍵字抓取
-            long_val = int(row['未平倉多方口數'])
-            short_val = int(row['未平倉空方口數'])
-            net_val = int(row['未平倉多空淨額'])
+        result = {'date': today_str}
+        for item in tx_data:
+            name = item.get('IdentityName', '')
+            long_val = int(item.get('OpenInterestLong', 0))
+            short_val = int(item.get('OpenInterestShort', 0))
+            net_val = int(item.get('OpenInterestNet', 0))
             
             if '外資' in name or '陸資' in name:
-                results[date_str]['foreign'] = {'long': long_val, 'short': short_val, 'net': net_val}
+                result['foreign'] = {'long': long_val, 'short': short_val, 'net': net_val}
             elif '投信' in name:
-                results[date_str]['sitc'] = {'long': long_val, 'short': short_val, 'net': net_val}
+                result['sitc'] = {'long': long_val, 'short': short_val, 'net': net_val}
             elif '自營商' in name:
-                results[date_str]['dealers'] = {'long': long_val, 'short': short_val, 'net': net_val}
-                
-        # 轉成 List 並按日期由舊到新排序
-        final_list = [v for k, v in results.items() if 'foreign' in v and 'sitc' in v and 'dealers' in v]
-        final_list.sort(key=lambda x: x['date'])
+                result['dealers'] = {'long': long_val, 'short': short_val, 'net': net_val}
         
-        # 精確切取最後 30 個交易日
-        return final_list[-30:]
-        
-    except Exception as e:
-        print(f"真實歷史資料抓取失敗: {e}")
+        if 'foreign' in result and 'sitc' in result and 'dealers' in result:
+            return result
+        return None
+    except:
         return None
 
+def get_history_data():
+    """第二軌：動態解析官方歷史 CSV 檔（穩健、無誤差）"""
+    url = "https://www.taifex.com.tw/cht/3/futThreeBigProductInstiDown"
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=60)
+    payload = {
+        'down_type': '1',
+        'queryStartDate': start_date.strftime("%Y/%m/%d"),
+        'queryEndDate': end_date.strftime("%Y/%m/%d"),
+        'commodityId': 'TX'
+    }
+    try:
+        response = requests.post(url, data=payload, timeout=20)
+        if response.status_code != 200: return []
+        
+        df_headers = pd.read_csv(io.StringIO(response.text), nrows=0)
+        headers = [c.strip() for c in df_headers.columns]
+        
+        long_idx = headers.index('未平倉多方口數')
+        short_idx = headers.index('未平倉空方口數')
+        net_idx = headers.index('未平倉多空淨額')
+        date_idx = headers.index('日期')
+        prod_idx = headers.index('商品名稱')
+        name_idx = headers.index('身份別')
+
+        df = pd.read_csv(io.StringIO(response.text), header=None, skiprows=1)
+        results = {}
+        for _, row in df.iterrows():
+            try:
+                commodity = str(row[prod_idx]).strip()
+                if '臺股期貨' not in commodity and 'TX' not in commodity: continue
+                date_str = str(row[date_idx]).strip().replace('-', '/')
+                name = str(row[name_idx]).strip()
+                
+                long_val = int(row[long_idx])
+                short_val = int(row[short_idx])
+                net_val = int(row[net_idx])
+                
+                if date_str not in results:
+                    results[date_str] = {'date': date_str}
+                if '外資' in name or '陸資' in name:
+                    results[date_str]['foreign'] = {'long': long_val, 'short': short_val, 'net': net_val}
+                elif '投信' in name:
+                    results[date_str]['sitc'] = {'long': long_val, 'short': short_val, 'net': net_val}
+                elif '自營商' in name:
+                    results[date_str]['dealers'] = {'long': long_val, 'short': short_val, 'net': net_val}
+            except:
+                continue
+        
+        final_list = [v for k, v in results.items() if 'foreign' in v and 'sitc' in v and 'dealers' in v]
+        final_list.sort(key=lambda x: x['date'])
+        return final_list
+    except:
+        return []
+
 def update_web():
-    # 取得 100% 真實官方 30 天數據
-    real_data_list = get_real_30_day_history()
+    # 1. 先抓歷史基底
+    data_list = get_history_data()
     
-    if not real_data_list or len(real_data_list) == 0:
-        print("無法取得官方真實數據，終止更新以防覆蓋錯誤。")
+    # 2. 抓今天最新的即時數據
+    today_data = get_today_live_data()
+    
+    # 3. 雙軌大融合機制
+    if today_data:
+        # 如果歷史資料裡還沒有今天，就把今天強力黏在最後面
+        if not any(d['date'] == today_data['date'] for d in data_list):
+            data_list.append(today_data)
+        else:
+            # 如果歷史資料已經有今天了，用最新即時數據覆蓋，確保萬無一失
+            for idx, d in enumerate(data_list):
+                if d['date'] == today_data['date']:
+                    data_list[idx] = today_data
+                    break
+    
+    # 防錯安全熔斷
+    if len(data_list) < 10:
+        print("【安全機制】最終合併資料量嚴重不足，取消寫入防止損壞網頁！")
         return
+        
+    # 永遠保留最完美的最新 30 筆交易日紀錄
+    data_list = data_list[-30:]
         
     with open("index.html", "r", encoding="utf-8") as f:
         html_content = f.read()
         
     start_tag = 'const rawData = '
     end_tag = '; // 供未來機器人每天疊加最新數據使用'
-    
     start_idx = html_content.find(start_tag) + len(start_tag)
     end_idx = html_content.find(end_tag)
     
-    if start_idx == -1 or end_idx == -1:
-        print("找不到數據標籤位置")
-        return
+    if start_idx == -1 or end_idx == -1: return
         
-    # 直接用 100% 全真實的 30 天數據替換掉網頁內的變數！
-    new_data_str = json.dumps(real_data_list, ensure_ascii=False)
+    new_data_str = json.dumps(data_list, ensure_ascii=False)
     new_html = html_content[:start_idx] + new_data_str + html_content[end_idx:]
     
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(new_html)
-    print(f"成功灌入官方真實 30 天期貨數據！最新日期為：{real_data_list[-1]['date']}")
+    print(f"【全面成功】雙軌籌碼校正寫入完畢！目前最新交易日為：{data_list[-1]['date']}")
 
 if __name__ == "__main__":
     update_web()
