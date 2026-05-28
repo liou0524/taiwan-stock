@@ -112,7 +112,6 @@ def generate_html_template(data_list_json):
                 <h1 class="text-xl md:text-2xl font-black tracking-widest text-cyan-400 neon-text-cyan">SYSTEM://TRI_法人期貨留倉觀測站</h1>
                 <p class="text-[10px] text-slate-500 mt-1">最後更新時間: <span id="update-date" class="text-slate-400">LOADING...</span></p>
             </div>
-            <span class="px-2 py-1 text-[10px] bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 rounded">📊 近 10 日數據變化</span>
         </div>
         <div class="overflow-x-auto mb-8 rounded-xl border border-slate-800 bg-[#0d1321]">
             <table class="w-full text-left border-collapse">
@@ -125,18 +124,9 @@ def generate_html_template(data_list_json):
                     </tr>
                 </thead>
                 <tbody class="text-sm divide-y divide-slate-800/60">
-                    <tr>
-                        <td class="p-4 font-bold text-amber-400 neon-text-orange">■ 外資及陸資</td>
-                        <td id="foreign-long" class="p-4 text-right">--</td><td id="foreign-short" class="p-4 text-right">--</td><td id="foreign-net" class="p-4 text-right font-black text-base">--</td>
-                    </tr>
-                    <tr>
-                        <td class="p-4 font-bold text-blue-400">■ 投信</td>
-                        <td id="sitc-long" class="p-4 text-right">--</td><td id="sitc-short" class="p-4 text-right">--</td><td id="sitc-net" class="p-4 text-right font-black text-base">--</td>
-                    </tr>
-                    <tr>
-                        <td class="p-4 font-bold text-emerald-400">■ 自營商</td>
-                        <td id="dealers-long" class="p-4 text-right">--</td><td id="dealers-short" class="p-4 text-right">--</td><td id="dealers-net" class="p-4 text-right font-black text-base">--</td>
-                    </tr>
+                    <tr><td class="p-4 font-bold text-amber-400 neon-text-orange">■ 外資及陸資</td><td id="foreign-long" class="p-4 text-right">--</td><td id="foreign-short" class="p-4 text-right">--</td><td id="foreign-net" class="p-4 text-right font-black text-base">--</td></tr>
+                    <tr><td class="p-4 font-bold text-blue-400">■ 投信</td><td id="sitc-long" class="p-4 text-right">--</td><td id="sitc-short" class="p-4 text-right">--</td><td id="sitc-net" class="p-4 text-right font-black text-base">--</td></tr>
+                    <tr><td class="p-4 font-bold text-emerald-400">■ 自營商</td><td id="dealers-long" class="p-4 text-right">--</td><td id="dealers-short" class="p-4 text-right">--</td><td id="dealers-net" class="p-4 text-right font-black text-base">--</td></tr>
                 </tbody>
             </table>
         </div>
@@ -145,52 +135,41 @@ def generate_html_template(data_list_json):
             <div class="h-72 w-full"><canvas id="trendsChart"></canvas></div>
         </div>
     </div>
-<script>
-        // 強制解析 JSON，確保數據不會因為格式問題而中斷
-        const rawData = JSON.parse('{data_list_json}');
-        
-        if (rawData && rawData.length > 0) {
+    <script>
+        const rawData = {data_list_json};
+        if (rawData && rawData.length > 0) {{
             const latest = rawData[rawData.length - 1];
-            // 更新更新日期
             document.getElementById('update-date').innerText = latest.date + " (數據就緒)";
-            
-            // 填寫表格數據
-            const fillRow = (prefix, data) => {
+            const fillRow = (prefix, data) => {{
                 document.getElementById(prefix + '-long').innerText = data.long.toLocaleString();
                 document.getElementById(prefix + '-short').innerText = data.short.toLocaleString();
                 const net = data.net;
                 const netEl = document.getElementById(prefix + '-net');
                 netEl.innerText = (net > 0 ? "+" : "") + net.toLocaleString();
                 netEl.className = net >= 0 ? "p-4 text-right font-black text-base text-rose-500" : "p-4 text-right font-black text-base text-emerald-400";
-            };
-            
+            }};
             if(latest.foreign) fillRow('foreign', latest.foreign);
             if(latest.sitc) fillRow('sitc', latest.sitc);
             if(latest.dealers) fillRow('dealers', latest.dealers);
 
-            // 繪製歷史趨勢圖
             const ctx = document.getElementById('trendsChart').getContext('2d');
-            new Chart(ctx, {
+            new Chart(ctx, {{
                 type: 'line',
-                data: {
+                data: {{
                     labels: rawData.map(d => d.date.substring(5)),
                     datasets: [
-                        { label: '外資淨額', data: rawData.map(d => d.foreign ? d.foreign.net : 0), borderColor: '#f59e0b', borderWidth: 3, tension: 0.1 },
-                        { label: '投信淨額', data: rawData.map(d => d.sitc ? d.sitc.net : 0), borderColor: '#3b82f6', borderWidth: 2, tension: 0.1 },
-                        { label: '自營商淨額', data: rawData.map(d => d.dealers ? d.dealers.net : 0), borderColor: '#10b981', borderWidth: 2, tension: 0.1 }
+                        {{ label: '外資淨額', data: rawData.map(d => d.foreign ? d.foreign.net : 0), borderColor: '#f59e0b', borderWidth: 3, tension: 0.1 }},
+                        {{ label: '投信淨額', data: rawData.map(d => d.sitc ? d.sitc.net : 0), borderColor: '#3b82f6', borderWidth: 2, tension: 0.1 }},
+                        {{ label: '自營商淨額', data: rawData.map(d => d.dealers ? d.dealers.net : 0), borderColor: '#10b981', borderWidth: 2, tension: 0.1 }}
                     ]
-                },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: '#94a3b8' } } },
-                    scales: { y: { ticks: { color: '#94a3b8' } }, x: { ticks: { color: '#94a3b8' } } }
-                }
-            });
-        }
+                }},
+                options: {{ responsive: true, maintainAspectRatio: false }}
+            }});
+        }}
     </script>
 </body>
 </html>
+"""
 """
 
 def update_web():
